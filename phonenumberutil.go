@@ -2,6 +2,7 @@ package libphonenumber
 
 import (
 	"errors"
+	"log"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -2350,6 +2351,7 @@ func testNumberLengthAgainstPattern(
 	number string) ValidationResult {
 
 	inds := numberPattern.FindStringIndex(number)
+	log.Printf("zls: testNumberLengthAgainstPattern: %#v, match: %+v\n", number, inds)
 	if len(inds) > 0 && inds[0] == 0 { // Match from the start
 		if inds[1] == len(number) { // Exact match
 			return IS_POSSIBLE
@@ -2410,6 +2412,7 @@ func IsPossibleNumberWithReason(number *PhoneNumber) ValidationResult {
 	var metadata *PhoneMetadata = getMetadataForRegionOrCallingCode(
 		countryCode, regionCode)
 	var generalNumDesc *PhoneNumberDesc = metadata.GetGeneralDesc()
+	log.Printf("zls: generalNumDesc: %#v, pattern: %v\n", generalNumDesc, generalNumDesc.GetNationalNumberPattern())
 	// Handling case of numbers with no metadata.
 	if len(generalNumDesc.GetNationalNumberPattern()) == 0 {
 		numberLength := len(nationalNumber)
