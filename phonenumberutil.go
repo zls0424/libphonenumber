@@ -2,7 +2,6 @@ package libphonenumber
 
 import (
 	"errors"
-	"log"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -13,6 +12,7 @@ import (
 	"github.com/ttacon/builder"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/glog"
 )
 
 const (
@@ -2351,11 +2351,12 @@ func testNumberLengthAgainstPattern(
 	number string) ValidationResult {
 
 	inds := numberPattern.FindStringIndex(number)
-	log.Printf("zls: testNumberLengthAgainstPattern: %#v, match: %+v\n", number, inds)
+	glog.Infof("zls: testNumberLengthAgainstPattern: %#v, match: %+v\n", number, inds)
 	if len(inds) > 0 && inds[0] == 0 { // Match from the start
 		if inds[1] == len(number) { // Exact match
 			return IS_POSSIBLE
 		}
+		glog.Info("zls: testNumberLengthAgainstPattern: return too long")
 		return TOO_LONG // Matches input start but not end
 	}
 
@@ -2396,6 +2397,7 @@ func isShorterThanPossibleNormalNumber(
 //    line numbers), it will return false for the subscriber-number-only
 //    version.
 func IsPossibleNumberWithReason(number *PhoneNumber) ValidationResult {
+	glog.Infof("zls: IsPossibleNumberWithReason called")
 	nationalNumber := GetNationalSignificantNumber(number)
 	countryCode := int(number.GetCountryCode())
 	// Note: For Russian Fed and NANPA numbers, we just use the rules
@@ -2405,6 +2407,7 @@ func IsPossibleNumberWithReason(number *PhoneNumber) ValidationResult {
 	// number pattern ever differed between various regions within
 	// those plans.
 	if !hasValidCountryCallingCode(countryCode) {
+		glog.Infof("zls: not hasValidCountryCallingCode ")
 		return INVALID_COUNTRY_CODE
 	}
 	regionCode := GetRegionCodeForCountryCode(countryCode)
@@ -2412,7 +2415,7 @@ func IsPossibleNumberWithReason(number *PhoneNumber) ValidationResult {
 	var metadata *PhoneMetadata = getMetadataForRegionOrCallingCode(
 		countryCode, regionCode)
 	var generalNumDesc *PhoneNumberDesc = metadata.GetGeneralDesc()
-	log.Printf("zls: generalNumDesc: %#v, pattern: %v\n", generalNumDesc, generalNumDesc.GetNationalNumberPattern())
+	glog.Infof("zls: generalNumDesc: %#v, pattern: %v\n", generalNumDesc, generalNumDesc.GetNationalNumberPattern())
 	// Handling case of numbers with no metadata.
 	if len(generalNumDesc.GetNationalNumberPattern()) == 0 {
 		numberLength := len(nationalNumber)
